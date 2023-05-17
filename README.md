@@ -1,5 +1,38 @@
 <img src="src/assets/img/icon-128.png" width="64"/>
 
+# 4handy Pancake Extension
+
+Extension này giúp hiển thị thông tin khách hàng ở sidebar khi truy cập https://pancake.vn/savor.vn.
+
+![image](https://storage.4-handy.com/hieple/screenshot.png)
+
+## Hướng dẫn chạy
+
+- `npm install` để cài đặt các package cần thiết
+- `npm start` để chạy extension ở chế độ development
+- Vào trang [Extensions của chrome](chrome://extensions/) và chọn `Load unpacked` để load extension từ thư mục `build` vừa được tạo ra
+- Truy cập vào https://pancake.vn/savor.vn để xem kết quả
+
+## Hướng dẫn cài đặt server development
+
+Do trang pancake dùng https nên server development cũng phải dùng https. Để tạo được https, cần tạo 1 thư mục `ssl`, sau đó cài đặt [mkcert](https://github.com/FiloSottile/mkcert) và tạo certificate cho domain `localhost`:
+
+```bash
+mkcert -install
+# tạo certificate cho domain localhost ở thư mục ssl
+mkcert localhost -cert-file ssl/localhost.pem -key-file ssl/localhost-key.pem
+```
+
+Sau đó chạy `npm start` là ok
+
+## Hướng dẫn build
+
+Chạy `NODE_ENV=production npm run build` để build extension. Kết quả sẽ được lưu ở thư mục `build`.
+
+---
+
+Sau đây là hướng dẫn nguyên bản của boilerplate
+
 # Chrome Extension (MV3) Boilerplate with React 18 and Webpack 5
 
 [![npm](https://img.shields.io/npm/v/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)
@@ -148,3 +181,41 @@ ApiCall({ key: secrets.key });
 ---
 
 Michael Xieyang Liu | [Website](https://lxieyang.github.io)
+
+## Default
+
+Default manifest.json
+
+```json
+{
+  "manifest_version": 3,
+  "name": "Chrome Extension with React & Webpack",
+  "description": "A chrome extension boilerplate built with React 17, Webpack 5, and Webpack Dev Server 4",
+  "options_page": "options.html",
+  "background": { "service_worker": "background.bundle.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon-34.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "js": ["contentScript.bundle.js"],
+      "css": ["content.styles.css"]
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["content.styles.css", "icon-128.png", "icon-34.png"],
+      "matches": []
+    }
+  ]
+}
+```

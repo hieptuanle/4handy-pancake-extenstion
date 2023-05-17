@@ -9,6 +9,8 @@ var WebpackDevServer = require('webpack-dev-server'),
   env = require('./env'),
   path = require('path');
 
+var fs = require('fs');
+
 var options = config.chromeExtensionBoilerplate || {};
 var excludeEntriesToHotReload = options.notHotReload || [];
 
@@ -16,7 +18,7 @@ for (var entryName in config.entry) {
   if (excludeEntriesToHotReload.indexOf(entryName) === -1) {
     config.entry[entryName] = [
       'webpack/hot/dev-server',
-      `webpack-dev-server/client?hot=true&hostname=localhost&port=${env.PORT}`,
+      `webpack-dev-server/client?protocol=https&hot=true&hostname=localhost&port=${env.PORT}`,
     ].concat(config.entry[entryName]);
   }
 }
@@ -27,7 +29,10 @@ var compiler = webpack(config);
 
 var server = new WebpackDevServer(
   {
-    https: false,
+    https: {
+      key: fs.readFileSync(path.join(__dirname, '../ssl/localhost-key.pem')),
+      cert: fs.readFileSync(path.join(__dirname, '../ssl/localhost.pem')),
+    },
     hot: true,
     liveReload: false,
     client: {
@@ -40,7 +45,7 @@ var server = new WebpackDevServer(
       directory: path.join(__dirname, '../build'),
     },
     devMiddleware: {
-      publicPath: `http://localhost:${env.PORT}/`,
+      publicPath: `https://localhost:${env.PORT}/`,
       writeToDisk: true,
     },
     headers: {
