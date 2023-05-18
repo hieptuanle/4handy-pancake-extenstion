@@ -1,20 +1,23 @@
 import React from 'react';
 import {
+  useListenMessage,
+  conversationRequestAtom,
   loadableConversationInfo,
   loadableCustomerAtom,
   loadableCustomerComplaintsAtom,
   loadableUnusedVouchersAtom,
-  useConversation,
-} from './useConversation';
+} from './stores';
 import { useAtom } from 'jotai';
 import { Price } from './Price';
 
 export const CustomerInfo: React.FC = () => {
-  const { conversation } = useConversation();
+  useListenMessage();
+  const [conversation] = useAtom(conversationRequestAtom);
   const [conversationInfo] = useAtom(loadableConversationInfo);
   const [customerInfo] = useAtom(loadableCustomerAtom);
   const [complaints] = useAtom(loadableCustomerComplaintsAtom);
   const [vouchers] = useAtom(loadableUnusedVouchersAtom);
+
   return (
     <div>
       <h1>Thông tin Khách hàng</h1>

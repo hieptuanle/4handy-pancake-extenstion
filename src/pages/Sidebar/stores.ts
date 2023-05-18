@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { atom, useAtom } from 'jotai';
+import { atom, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 import { authenticationAtom } from './Authentication';
 import { debounce } from 'lodash';
@@ -158,8 +158,8 @@ export const loadableCustomerComplaintsAtom = loadable(customerComplaintsAtom);
 export const loadableConversationInfo = loadable(conversationInfoAtom);
 export const loadableCustomerAtom = loadable(customerAtom);
 
-export const useConversation = () => {
-  const [conversation, setConversation] = useAtom(conversationRequestAtom);
+export const useListenMessage = () => {
+  const setConversationRequest = useSetAtom(conversationRequestAtom);
 
   useEffect(() => {
     console.log('ADD EVENT LISTENER');
@@ -168,14 +168,10 @@ export const useConversation = () => {
         sendResponse({ success: true });
         console.log('message', message, 'sender', sender);
         if (message.type === 'GET_RECENT_ORDERS') {
-          setConversation(message.data as TConversationRequest);
+          setConversationRequest(message.data as TConversationRequest);
           return true;
         }
       }, 200)
     );
-  }, [setConversation]);
-
-  return {
-    conversation,
-  };
+  }, [setConversationRequest]);
 };
