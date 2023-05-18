@@ -1,13 +1,17 @@
 import React from 'react';
 import './index.css';
+import { AuthenticationForm, authenticationAtom } from './Authentication';
+import { useAtom } from 'jotai';
+import { CustomerInfo } from './CustomerInfo';
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC = React.memo(() => {
+  const [authentication] = useAtom(authenticationAtom);
   return (
     <div className="container">
-      <h1>Thông tin Khách hàng</h1>
-      <p>Cool</p>
+      <AuthenticationForm />
+      {authentication.loggedIn && <CustomerInfo></CustomerInfo>}
     </div>
   );
-};
+});
 
 export default Sidebar;

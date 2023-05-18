@@ -6,6 +6,16 @@
   "action": {
     "default_icon": "icon-34.png"
   },
+  "permissions": [
+    "activeTab",
+    "webNavigation",
+    "scripting",
+    "storage",
+    "contextMenus",
+    "clipboardRead",
+    "webRequest"
+  ],
+  "host_permissions": ["*://pancake.vn/*", "*://pages.fm/*"],
   "icons": {
     "128": "icon-128.png"
   },
