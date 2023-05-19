@@ -7,7 +7,6 @@ import {
   loadableCustomerComplaintsAtom,
   loadableCustomerVouchersAtom,
   loadableOnlineOrdersAtom,
-  mostRecentReceiverCustomer,
   loadableMostRecentReceiverCustomer,
 } from './stores';
 import { useAtomValue } from 'jotai';
@@ -18,8 +17,6 @@ import {
   Card,
   CheckIcon,
   Divider,
-  Group,
-  HoverCard,
   List,
   Loader,
   Stack,
@@ -49,9 +46,7 @@ export const CustomerInfo: React.FC = () => {
 
   return (
     <Stack>
-      <Title order={2}>Conversation</Title>
-
-      <Group>
+      {/* <Group>
         <HoverCard>
           <HoverCard.Target>
             <Text>Conversation ID</Text>
@@ -69,10 +64,15 @@ export const CustomerInfo: React.FC = () => {
             <Text>{conversation?.customerId}</Text>
           </HoverCard.Dropdown>
         </HoverCard>
-      </Group>
+      </Group> */}
+
+      <Title order={2}>
+        {!hasCustomerInfo && 'Customer Info'}
+        {hasCustomerInfo && customerInfo.data?.fullName}
+      </Title>
 
       <Text>
-        Phone:{' '}
+        Điện thoại:{' '}
         {conversationInfo.state === 'loading'
           ? 'Loading...'
           : conversationInfo.state === 'hasData'
@@ -80,12 +80,6 @@ export const CustomerInfo: React.FC = () => {
           : 'Error'}
       </Text>
 
-      <Divider />
-
-      <Title order={2}>
-        {!hasCustomerInfo && 'Customer Info'}
-        {hasCustomerInfo && customerInfo.data?.fullName}
-      </Title>
       {customerInfo.state === 'loading' && <Loader />}
       {customerInfo.state === 'hasData' && !customerInfo.data?._id && (
         <Text>No Customer Data</Text>
