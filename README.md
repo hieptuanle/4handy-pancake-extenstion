@@ -4,7 +4,7 @@
 
 Extension này giúp hiển thị thông tin khách hàng ở sidebar khi truy cập https://pancake.vn/savor.vn.
 
-![image](https://storage.4-handy.com/hieple/screenshot.png)
+![image](https://storage.4-handy.com/hieple/screenshot2.png)
 
 ## Hướng dẫn chạy
 
