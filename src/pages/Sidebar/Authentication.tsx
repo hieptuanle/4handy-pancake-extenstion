@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
+import { Button, Container, Group, Text, TextInput } from '@mantine/core';
 
 type TAuthentication = {
   loggedIn: boolean;
@@ -30,10 +31,8 @@ export const persistentAuthenticationAtom = atom(
   }
 );
 
-export const AuthenticationForm: React.FC = () => {
-  const [authentication, setAuthentication] = useAtom(
-    persistentAuthenticationAtom
-  );
+export const LoginForm: React.FC = () => {
+  const setAuthentication = useSetAtom(persistentAuthenticationAtom);
 
   const { register, handleSubmit } = useForm();
   const onSubmit: any = (data: any) => {
@@ -58,43 +57,40 @@ export const AuthenticationForm: React.FC = () => {
       });
   };
   return (
-    <div>
-      {!authentication.loggedIn && (
-        <div>
-          <h1>Login Webwork</h1>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-            }}
-          >
-            <label htmlFor="username">Username:</label>
-            <input
-              {...register('username')}
-              type="text"
-              id="username"
-              name="username"
-            />
-            <label htmlFor="password">Password:</label>
-            <input
-              {...register('password')}
-              type="password"
-              id="password"
-              name="password"
-            />
-            <input type="submit" />
-          </form>
-        </div>
-      )}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+      }}
+    >
+      <TextInput label="Username" {...register('username')}></TextInput>
+      <TextInput
+        type="password"
+        label="Password"
+        {...register('password')}
+      ></TextInput>
+      <Button type="submit">Login</Button>
+    </form>
+  );
+};
+
+export const AuthenticationForm: React.FC = () => {
+  const [authentication, setAuthentication] = useAtom(
+    persistentAuthenticationAtom
+  );
+
+  return (
+    <Container fluid>
+      {!authentication.loggedIn && <Text size="lg">Login</Text>}
 
       {authentication.loggedIn && (
-        <div>
-          <h1>Thông tin đăng nhập</h1>
-          <p>Username: {authentication.username}</p>
-          <p>Display name: {authentication.displayName}</p>
-          <button
+        <Group>
+          <Text fz="md">Hello {authentication.displayName}!</Text>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setAuthentication({
                 loggedIn: false,
@@ -105,9 +101,9 @@ export const AuthenticationForm: React.FC = () => {
             }}
           >
             Logout
-          </button>
-        </div>
+          </Button>
+        </Group>
       )}
-    </div>
+    </Container>
   );
 };

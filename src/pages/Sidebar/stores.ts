@@ -56,6 +56,8 @@ type TCustomer = {
 type TComplaint = {
   _id: string;
   title: string;
+  status: string;
+  created: string;
 };
 
 export const customerAtom = atom<Promise<TCustomer | null>>(async (get) => {
@@ -141,9 +143,13 @@ export const customerVouchersAtom = atom<Promise<Voucher[]>>(async (get) => {
     }
   ).then((res) => res.json());
 
+  const notExipredVouchers = response.filter(
+    (voucher: Voucher) => new Date(voucher.expiryDate) > new Date()
+  );
+
   console.log('vouchers', response);
 
-  return response;
+  return notExipredVouchers;
 });
 
 export const unsedVouchersAtom = atom<Promise<Voucher[]>>(async (get) => {
@@ -157,6 +163,75 @@ export const loadableCustomerVouchersAtom = loadable(customerVouchersAtom);
 export const loadableCustomerComplaintsAtom = loadable(customerComplaintsAtom);
 export const loadableConversationInfo = loadable(conversationInfoAtom);
 export const loadableCustomerAtom = loadable(customerAtom);
+
+type TReceiverCustomer = {
+  name: string;
+  email: string;
+  cellphone: string;
+  address: string;
+  originalAddress: string;
+  street: string;
+  ward: string;
+  district: string;
+  city: string;
+};
+
+type TOnlineOrder = {
+  _id: string;
+  onlineOrderId: string;
+  status: string;
+  orderCustomer: {
+    name: string;
+    email: string;
+    cellphone: string;
+  };
+  receiverCustomer: TReceiverCustomer;
+  orderValue: number;
+  created: string;
+};
+
+export const onlineOrdersAtom = atom<Promise<TOnlineOrder[]>>(async (get) => {
+  const customer = await get(customerAtom);
+  if (!customer) return [];
+
+  const cellphone = customer.cellphone;
+  if (!cellphone) return [];
+
+  const authentication = get(authenticationAtom);
+  if (!authentication.loggedIn) return [];
+
+  console.log('fetching customer online orders');
+  const response = await fetch(
+    `https://work.4-handy.com/online-orders/get-customer-online-orders?cellphone=${cellphone}`,
+    {
+      headers: {
+        Authorization: `Bearer ${authentication?.token}`,
+      },
+    }
+  ).then((res) => res.json());
+
+  console.log('onlineOrders', response);
+
+  return response;
+});
+
+export const mostRecentReceiverCustomer = atom<
+  Promise<TReceiverCustomer | null>
+>(async (get) => {
+  const onlineOrders = await get(onlineOrdersAtom);
+  if (!onlineOrders) return null;
+
+  const mostRecentOrder = onlineOrders[0];
+  if (!mostRecentOrder) return null;
+
+  return mostRecentOrder.receiverCustomer;
+});
+
+export const loadableMostRecentReceiverCustomer = loadable(
+  mostRecentReceiverCustomer
+);
+
+export const loadableOnlineOrdersAtom = loadable(onlineOrdersAtom);
 
 export const useListenMessage = () => {
   const setConversationRequest = useSetAtom(conversationRequestAtom);

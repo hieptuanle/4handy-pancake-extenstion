@@ -5,90 +5,217 @@ import {
   loadableConversationInfo,
   loadableCustomerAtom,
   loadableCustomerComplaintsAtom,
-  loadableUnusedVouchersAtom,
+  loadableCustomerVouchersAtom,
+  loadableOnlineOrdersAtom,
+  mostRecentReceiverCustomer,
+  loadableMostRecentReceiverCustomer,
 } from './stores';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { Price } from './Price';
+import {
+  Anchor,
+  Badge,
+  Card,
+  CheckIcon,
+  Divider,
+  Group,
+  HoverCard,
+  List,
+  Loader,
+  Stack,
+  Text,
+  ThemeIcon,
+  Timeline,
+  Title,
+} from '@mantine/core';
+import { DateTime } from './DateTime';
+import { IconCircleCheck, IconCircleDashed } from '@tabler/icons-react';
+import { OnlineOrderStatus } from './OnlineOrderStatus';
 
 export const CustomerInfo: React.FC = () => {
   useListenMessage();
-  const [conversation] = useAtom(conversationRequestAtom);
-  const [conversationInfo] = useAtom(loadableConversationInfo);
-  const [customerInfo] = useAtom(loadableCustomerAtom);
-  const [complaints] = useAtom(loadableCustomerComplaintsAtom);
-  const [vouchers] = useAtom(loadableUnusedVouchersAtom);
+  const conversation = useAtomValue(conversationRequestAtom);
+  const conversationInfo = useAtomValue(loadableConversationInfo);
+  const customerInfo = useAtomValue(loadableCustomerAtom);
+  const complaints = useAtomValue(loadableCustomerComplaintsAtom);
+  const vouchers = useAtomValue(loadableCustomerVouchersAtom);
+  const onlineOrders = useAtomValue(loadableOnlineOrdersAtom);
+  const mostRecentReceiverCustomer = useAtomValue(
+    loadableMostRecentReceiverCustomer
+  );
+
+  const hasCustomerInfo =
+    customerInfo.state === 'hasData' && customerInfo.data?._id;
 
   return (
-    <div>
-      <h1>Thông tin Khách hàng</h1>
-      <h2>Thông tin chung:</h2>
-      <p>Conversation ID: {conversation?.conversationId}</p>
-      <p>Customer ID: {conversation?.customerId}</p>
-      <p>
+    <Stack>
+      <Title order={2}>Conversation</Title>
+
+      <Group>
+        <HoverCard>
+          <HoverCard.Target>
+            <Text>Conversation ID</Text>
+          </HoverCard.Target>
+          <HoverCard.Dropdown>
+            <Text>{conversation?.conversationId}</Text>
+          </HoverCard.Dropdown>
+        </HoverCard>
+
+        <HoverCard>
+          <HoverCard.Target>
+            <Text>Customer ID</Text>
+          </HoverCard.Target>
+          <HoverCard.Dropdown>
+            <Text>{conversation?.customerId}</Text>
+          </HoverCard.Dropdown>
+        </HoverCard>
+      </Group>
+
+      <Text>
         Phone:{' '}
         {conversationInfo.state === 'loading'
           ? 'Loading...'
           : conversationInfo.state === 'hasData'
           ? conversationInfo.data?.recentPhoneNumbers.join(', ')
           : 'Error'}
-      </p>
+      </Text>
 
-      <h2>Thông tin web work</h2>
-      {customerInfo.state === 'loading' && (
-        <p>Đang tải thông tin khách hàng...</p>
+      <Divider />
+
+      <Title order={2}>
+        {!hasCustomerInfo && 'Customer Info'}
+        {hasCustomerInfo && customerInfo.data?.fullName}
+      </Title>
+      {customerInfo.state === 'loading' && <Loader />}
+      {customerInfo.state === 'hasData' && !customerInfo.data?._id && (
+        <Text>No Customer Data</Text>
       )}
-      {customerInfo.state === 'hasData' && (
-        <div>
-          <p>Full Name: {customerInfo.data?.fullName}</p>
-          <p>Cellphone: {customerInfo.data?.cellphone}</p>
-
-          <div>
-            <h3>Thông tin khiếu nại</h3>
+      {customerInfo.state === 'hasData' && customerInfo.data?._id && (
+        <Stack>
+          <Stack>
+            <Title order={3}>Complaints</Title>
             {complaints.state === 'hasData' && complaints.data.length > 0 && (
-              <ul>
+              <Timeline>
                 {complaints.data.map((complaint) => (
-                  <li key={complaint._id}>
-                    <a
-                      href={`https://work.4-handy.com/#!/complaints/${complaint._id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {complaint.title}
-                    </a>
-                  </li>
+                  <Timeline.Item
+                    key={complaint._id}
+                    title={
+                      <Anchor
+                        href={`https://work.4-handy.com/#!/complaints/${complaint._id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {complaint.title}
+                      </Anchor>
+                    }
+                    bullet={
+                      complaint.status === 'done' ? (
+                        <CheckIcon></CheckIcon>
+                      ) : undefined
+                    }
+                  >
+                    <Text>
+                      <DateTime inpuDate={complaint.created}></DateTime>
+                    </Text>
+                  </Timeline.Item>
                 ))}
-              </ul>
+              </Timeline>
             )}
             {complaints.state === 'hasData' && complaints.data.length === 0 && (
-              <p>Không có khiếu nại</p>
+              <Text>No complaints</Text>
             )}
-            {complaints.state === 'loading' && <p>Đang tải...</p>}
-          </div>
+            {complaints.state === 'loading' && <Loader />}
+          </Stack>
 
-          <div>
-            <h3>Voucher có thể sử dụng</h3>
+          <Stack>
+            <Title order={3}>Vouchers</Title>
             {vouchers.state === 'hasData' && vouchers.data.length > 0 && (
-              <ul>
+              <List
+                icon={
+                  <ThemeIcon color="blue" size={24} radius="xl">
+                    <IconCircleDashed />
+                  </ThemeIcon>
+                }
+              >
                 {vouchers.data.map((voucher) => (
-                  <li key={voucher._id}>
-                    <a
+                  <List.Item
+                    key={voucher._id}
+                    icon={
+                      voucher.used ? (
+                        <ThemeIcon color="teal" size={24} radius="xl">
+                          <IconCircleCheck />
+                        </ThemeIcon>
+                      ) : undefined
+                    }
+                  >
+                    <Anchor
                       href={`https://work.4-handy.com/#!/vouchers/${voucher._id}`}
                       target="_blank"
                       rel="noreferrer"
                     >
                       {voucher.name} - <Price value={voucher.quantity} />
-                    </a>
-                  </li>
+                    </Anchor>
+                  </List.Item>
                 ))}
-              </ul>
+              </List>
             )}
             {vouchers.state === 'hasData' && vouchers.data.length === 0 && (
-              <p>Không có voucher</p>
+              <Text>No vouchers</Text>
             )}
-            {complaints.state === 'loading' && <p>Đang tải...</p>}
-          </div>
-        </div>
+            {complaints.state === 'loading' && <Loader />}
+          </Stack>
+
+          <Stack>
+            <Title order={3}>Online Orders</Title>
+            {onlineOrders.state === 'hasData' &&
+              onlineOrders.data.length > 0 && (
+                <Timeline>
+                  {onlineOrders.data.map((onlineOrder) => (
+                    <Timeline.Item
+                      key={onlineOrder._id}
+                      title={
+                        <>
+                          <OnlineOrderStatus status={onlineOrder.status} />{' '}
+                          <Badge>
+                            <Anchor
+                              href={`https://work.4-handy.com/#!/online-orders/${onlineOrder._id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {onlineOrder.onlineOrderId}
+                            </Anchor>
+                          </Badge>{' '}
+                        </>
+                      }
+                    >
+                      <Text weight={800}>
+                        <Price value={onlineOrder.orderValue} />
+                      </Text>
+                      {/* <DateTime inpuDate={onlineOrder.created}></DateTime> */}
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+              )}
+            {onlineOrders.state === 'hasData' &&
+              onlineOrders.data.length === 0 && <Text>No voucher</Text>}
+            {onlineOrders.state === 'loading' && <Loader />}
+          </Stack>
+
+          <Stack>
+            <Title order={3}>Last Address</Title>
+            {mostRecentReceiverCustomer.state === 'hasData' && (
+              <Card shadow="sm" withBorder>
+                <Text>Người nhận: {mostRecentReceiverCustomer.data?.name}</Text>
+                <Text>
+                  Điện thoại: {mostRecentReceiverCustomer.data?.cellphone}
+                </Text>
+                <Text>Địa chỉ: {mostRecentReceiverCustomer.data?.address}</Text>
+              </Card>
+            )}
+            {mostRecentReceiverCustomer.state === 'loading' && <Loader />}
+          </Stack>
+        </Stack>
       )}
-    </div>
+    </Stack>
   );
 };
